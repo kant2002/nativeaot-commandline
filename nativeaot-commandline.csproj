@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>nativeaot_commandline</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+		<IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+		<IlcInvariantGlobalization>true</IlcInvariantGlobalization>
+		<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+		<NoStdLib>true</NoStdLib>
+		<DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+		<SelfContained>false</SelfContained>
+		<UseAppHost>false</UseAppHost>
+		<NoConfig>true</NoConfig>
+		<RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+		<Optimize>true</Optimize>
+		<IlcOptimizationPreference>Size</IlcOptimizationPreference>
+		<IlcDisableReflection>true</IlcDisableReflection>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <IlcSystemModule>nativeaot-commandline</IlcSystemModule>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<LinkerArg Include="/subsystem:EFI_APPLICATION /entry:EfiMain" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
+	</ItemGroup>
+
+  <Target Name="GenerateVirtuaDisk" AfterTargets="Publish" Condition="$(GenerateVirtuaDisk) == 'True'">
+		<PropertyGroup>
+			<VHD>$(MSBuildProjectDirectory)\$(NativeOutputPath)zerosharp.vhdx</VHD>
+			<CreatePartitionCommand>
+				create vdisk file=$(VHD) maximum=50
+				select vdisk file=$(VHD)
+				attach vdisk
+				convert gpt
+				create partition efi size=40
+				format quick fs=fat32 label="System"
+				assign letter="X"
+				exit
+			</CreatePartitionCommand>
+			<CreatePartitionCommand2>
+				select vdisk file=$(VHD)
+				select partition 1
+				remove letter=X
+				detach vdisk
+				exit
+			</CreatePartitionCommand2>
+		</PropertyGroup>
+
+		<Delete Files="$(VHD)" />
+
+		<WriteLinesToFile File="$(NativeOutputPath)diskpart1.txt" Overwrite="true" Lines="$(CreatePartitionCommand)" />
+
+		<WriteLinesToFile File="$(NativeOutputPath)diskpart2.txt" Overwrite="true" Lines="$(CreatePartitionCommand2)" />
+		<Exec Command="diskpart /s &quot;$(MSBuildProjectDirectory)\$(NativeOutputPath)diskpart1.txt&quot;" />
+		<Copy SourceFiles="$(MSBuildProjectDirectory)\$(NativeOutputPath)$(TargetName)$(NativeBinaryExt)" DestinationFiles="X:\EFI\BOOT\BOOTX64.efi" />
+		<Exec Command="diskpart /s &quot;$(MSBuildProjectDirectory)\$(NativeOutputPath)diskpart2.txt&quot;" />
+	</Target>
+
+</Project>
