@@ -7,6 +7,7 @@ namespace System
     }
     public struct Void { }
     public struct Byte { }
+    public struct SByte { }
     public struct Int16 { }
     public struct Int32 { }
     public struct Boolean { }
@@ -157,6 +158,32 @@ namespace Internal.Runtime.CompilerHelpers
         [System.Runtime.RuntimeExport("RhpThrowEx")]
         static void RhpThrowEx(IntPtr ex)
         {
+        }
+    }
+
+    internal unsafe partial class StartupCodeHelpers
+    {
+        internal static unsafe void InitializeCommandLineArgsW(int argc, char** argv)
+        {
+        }
+
+        internal static unsafe void InitializeCommandLineArgs(int argc, sbyte** argv)
+        {
+        }
+
+        private static string[] GetMainMethodArguments()
+        {
+            return null;
+        }
+
+        private static void SetLatchedExitCode(int exitCode)
+        {
+        }
+
+        // Shuts down the class library and returns the process exit code.
+        private static int Shutdown()
+        {
+            return 0;
         }
     }
 }

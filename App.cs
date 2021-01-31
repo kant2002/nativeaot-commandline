@@ -1,9 +1,3 @@
 ﻿using System;
 
-class Program
-{
-    static void Main()
-    {
-        Console.WriteLine("Hello UEFI!");
-    }
-}
+Console.WriteLine("Hello UEFI!");
